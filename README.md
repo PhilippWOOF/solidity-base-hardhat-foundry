@@ -2,12 +2,11 @@
 
 ## Installation
 
-Prerequisites:
+Prerequisites: install [Node.js](https://nodejs.org/en/download/package-manager) 20.11+ or 21.2+ and [Visual Studio Code](https://code.visualstudio.com/download).
 
-- [Node.js](https://nodejs.org/en/download/package-manager) 20.11+ or 21.2+.
-- [Visual Studio Code](https://code.visualstudio.com/download).
+Open [the root of the project](./) using Visual Studio Code and install all the extensions recommended by notifications of Visual Studio Code, then restart Visual Studio Code.
 
-Run the following command in [the root of the project directory](./) to install all the dependencies specified in [`package.json`](./package.json) and [Husky hooks](#husky-hooks):
+Open the terminal and run the command below to install all the dependencies and prepare the project:
 
 ```shell
 npm i
@@ -21,4 +20,10 @@ npm run
 
 ## Troubleshooting
 
-Use `$ npm run clean` and try again.
+Run to clean up the project:
+
+```shell
+npm run clean
+```
+
+Afterwards, try again.
