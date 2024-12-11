@@ -12,7 +12,7 @@ node_modules/
 /typechain/
 /typechain-types/
 
-# Output files of the `solc` complier.
+# Output files of the `solc` compiler.
 *.abi
 *.bin
 *.bin-runtime
