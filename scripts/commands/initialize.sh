@@ -26,6 +26,9 @@ if [ ! -f "$INIT_FILE_PATH" ]; then
     if [ "$overwrite" == "y" ]; then
         git add .
         git commit -m "chore: remove the template's license"
+
+        echo "Do not forget to push this commit."
+        echo
     fi
 else
     echo "The project has already been initialized."
