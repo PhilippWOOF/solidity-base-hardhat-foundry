@@ -35,7 +35,7 @@
         "lint:sol": "npx hardhat check && npx prettier --check \"contracts/**/*.sol\"",
         "lint:sol:fix": "npx solhint --fix \"contracts/**/*.sol\" && npx prettier --write \"contracts/**/*.sol\"",
         "lint:workflow": "npx prettier -u --check \"*\" && npx eslint .; [ ! -f .audit_mode ] && npx hardhat check",
-        "prepare": "husky && bash scripts/commands/initialize.sh"
+        "prepare": "husky && mkdir -p contracts test && bash scripts/commands/initialize_template.sh"
     },
     "engines": {
         "node": ">=21.2.0 || >=20.11.0 <21.0.0",

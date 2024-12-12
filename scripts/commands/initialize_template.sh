@@ -2,13 +2,15 @@
 
 set -eo pipefail
 
-echo
-echo "Initializing a template..."
+if [ -f ".ci_mode" ]; then
+    exit 0
+fi
 
-INIT_FILE_PATH="./scripts/commands/.initialized"
+INIT_FILE_PATH="./scripts/commands/.initialized_template"
 
 if [ ! -f "$INIT_FILE_PATH" ]; then
-    mkdir -p contracts test
+    echo
+    echo "Initializing the template..."
 
     rm -f LICENSE
 
@@ -30,8 +32,6 @@ if [ ! -f "$INIT_FILE_PATH" ]; then
         echo "Do not forget to push this commit."
         echo
     fi
-else
-    echo "The project has already been initialized."
 fi
 
 echo
