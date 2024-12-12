@@ -3,7 +3,27 @@ name: Testing
 on:
   push:
     branches: [main]
+    paths:
+      - "**.ts"
+      - "**.js"
+      - "**.sol"
+      - "!**/.*"
+      - "!**.md"
+      - "!**.txt"
+      - "!**.sh"
+      - "!**.config.*"
+      - "hardhat.config.ts"
   pull_request:
+    paths:
+      - "**.ts"
+      - "**.js"
+      - "**.sol"
+      - "!**/.*"
+      - "!**.md"
+      - "!**.txt"
+      - "!**.sh"
+      - "!**.config.*"
+      - "hardhat.config.ts"
 
 jobs:
   test:
