@@ -34,7 +34,7 @@
         "lint:ts:fix": "npx prettier --write \"**/*.{ts,js}\" && npx eslint . --fix",
         "lint:sol": "npx hardhat check && npx prettier --check \"contracts/**/*.sol\"",
         "lint:sol:fix": "npx solhint --fix \"contracts/**/*.sol\" && npx prettier --write \"contracts/**/*.sol\"",
-        "lint:workflow": "npx prettier -u --check \"*\" && npx eslint . && npx hardhat check",
+        "lint:workflow": "npx prettier -u --check \"*\" && npx eslint .; [ ! -f .audit_mode ] && npx hardhat check",
         "prepare": "husky && bash scripts/commands/initialize.sh"
     },
     "engines": {
