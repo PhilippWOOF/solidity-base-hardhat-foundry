@@ -137,13 +137,13 @@ if (envs.FORKING_BLOCK_NUMBER) config.networks!.hardhat!.forking!.blockNumber = 
 
 // Extra settings for `hardhat-gas-reporter`.
 if (envs.COINMARKETCAP_API_KEY) config.gasReporter!.coinmarketcap = envs.COINMARKETCAP_API_KEY;
-if (envs.REPORT_GAS_TO_FILE === "md") {
+if (envs.REPORT_GAS_FILE_TYPE === "md") {
     config.gasReporter!.outputFile = "gas-report.md";
     config.gasReporter!.reportFormat = "markdown";
     config.gasReporter!.forceTerminalOutput = true;
     config.gasReporter!.forceTerminalOutputFormat = "terminal";
 }
-if (envs.REPORT_GAS_TO_FILE === "json") {
+if (envs.REPORT_GAS_FILE_TYPE === "json") {
     config.gasReporter!.outputJSON = true;
     config.gasReporter!.outputJSONFile = "gas-report.json";
     config.gasReporter!.includeBytecodeInJSON = true;
