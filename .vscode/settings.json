@@ -31,6 +31,8 @@
         "cnpm",
         "commitlint",
         "compat",
+        "compilef",
+        "compileh",
         "crytic",
         "depl",
         "docgen",
