@@ -11,11 +11,11 @@
                 "singleQuote": false,
                 "bracketSpacing": true,
                 "explicitTypes": "preserve",
-                "compiler": "0.8.0"
+                "compiler": "0.8.29"
             }
         },
         {
-            "files": ["*.ts", "*.js", "*.mjs", "*.cjs"],
+            "files": ["*.ts", "*.js", "eslint.config.mjs"],
             "options": {
                 "trailingComma": "none",
                 "printWidth": 120,
@@ -29,10 +29,7 @@
         {
             "files": ["*.json", "*.jsonc"],
             "options": {
-                "trailingComma": "none",
-                "tabWidth": 4,
-                "useTabs": false,
-                "singleQuote": false
+                "tabWidth": 4
             }
         },
         {
