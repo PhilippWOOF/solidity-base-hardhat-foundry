@@ -1,6 +1,6 @@
 const { readFile } = require("fs").promises;
 const { execAsync } = require("./exec-async");
-const { fileOrDirExists } = require("./file-or-dir-exists");
+const { fileExists } = require("./file-exists");
 
 async function parseGitSubmodules() {
     const data = await readFile(`${process.cwd()}/.gitmodules`, "utf-8");
@@ -24,7 +24,7 @@ async function parseGitSubmodules() {
 }
 
 async function isSubmoduleInstalled(modulePath) {
-    return fileOrDirExists(modulePath);
+    return fileExists(modulePath);
 }
 
 async function addSubmodule(m) {

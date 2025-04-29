@@ -3,28 +3,29 @@ const { join } = require("path");
 const { suggestOptionalDependencies } = require("./install-optional-deps.js");
 const { suggestAuditMode } = require("./suggest-audit-mode.js");
 const { suggestWorkflows } = require("./suggest-github-workflows.js");
-const { fileOrDirExists } = require("./file-or-dir-exists.js");
+const { fileExists } = require("./file-exists.js");
+const { removeTemplateLicense } = require("./remove-template-license.js");
 
 async function createFileInitialized() {
     const fileName = ".initialized";
     try {
         await writeFile(join(__dirname, fileName), "");
     } catch (err) {
-        console.error(`Error when creating the file ${fileName}: ${err}\n`);
+        console.error(`Error when creating the file \`${fileName}\`: ${err}\n`);
     }
 }
 
 async function finalizeAfterInstallation() {
     if (process.env.GH_ACTION) return;
-    if (await fileOrDirExists(join(__dirname, ".initialized"))) return;
+    if (await fileExists(join(__dirname, ".initialized"))) return;
 
-    console.log("Starting project setup...\n");
-
+    console.log("Starting project initialization...\n");
+    await removeTemplateLicense();
     await suggestOptionalDependencies();
     await suggestAuditMode();
     await suggestWorkflows();
     await createFileInitialized();
-    console.log("\nSetup completed successfully.");
+    console.log("\nInitialization completed successfully.");
 }
 
 finalizeAfterInstallation().catch((error) => {

@@ -1,5 +1,5 @@
 const { createPromptModule } = require("inquirer");
-const { readFile, writeFile } = require("fs").promises;
+const { readFile, writeFile } = require("fs/promises");
 const { join } = require("path");
 const { execAsync } = require("./exec-async.js");
 
@@ -29,30 +29,24 @@ async function updateHardhatConfig(imports) {
 
             // Check if the import statement already exists.
             if (!configContent.includes(importStatement)) {
-                // Find the last import statement.
-                const lastImportIndex = configContent.lastIndexOf("import");
-                if (lastImportIndex !== -1) {
-                    // Find the position of the second quote after the last import.
-                    const quoteIndex = configContent.indexOf('"', lastImportIndex);
-                    const endQuoteIndex = quoteIndex !== -1 ? quoteIndex : configContent.indexOf("'", lastImportIndex);
+                // Find the position of the "hardhat-exposed" import.
+                const hardhatExposedIndex = configContent.indexOf('import "hardhat-exposed";');
 
-                    if (endQuoteIndex !== -1) {
-                        // Determine the position to insert the new import statement.
-                        const insertPosition = endQuoteIndex + 1; // After the quote.
-                        // Check if there iss a semicolon after the import statement.
-                        const semicolonIndex = configContent.indexOf(";", insertPosition);
-                        const insertAfter = semicolonIndex !== -1 ? semicolonIndex + 1 : insertPosition;
+                if (hardhatExposedIndex !== -1) {
+                    // Find the end of the "hardhat-exposed" import line.
+                    const endOfHardhatExposedIndex = configContent.indexOf("\n", hardhatExposedIndex);
+                    const insertPosition =
+                        endOfHardhatExposedIndex !== -1 ? endOfHardhatExposedIndex : configContent.length;
 
-                        // Insert the new import statement after the last one.
-                        configContent = [
-                            configContent.slice(0, insertAfter),
-                            `\n${importStatement};`,
-                            configContent.slice(insertAfter)
-                        ].join("");
-                    }
-                }
-                // If no imports are found, just append it to the beginning.
-                else configContent = importStatement + configContent;
+                    // Insert the new import statement after the "hardhat-exposed" import.
+                    configContent = [
+                        configContent.slice(0, insertPosition),
+                        `\n${importStatement};`,
+                        configContent.slice(insertPosition)
+                    ].join("");
+                } else
+                    // If "hardhat-exposed" is not found, append the import at the beginning.
+                    configContent = importStatement + "\n" + configContent;
 
                 await writeFile(configPath, configContent, "utf-8");
             }
@@ -82,7 +76,7 @@ async function moveDependencySection() {
                     newPackageJSON[key] = packageJSON[key];
                 }
 
-                await writeFile(packageJSONPath, JSON.stringify(newPackageJSON, null, 2));
+                await writeFile(packageJSONPath, JSON.stringify(newPackageJSON, null, 4) + "\n");
                 console.log("Moved `dependencies` successfully.");
             }
         }

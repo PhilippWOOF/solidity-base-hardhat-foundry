@@ -32,6 +32,9 @@ gas-report.*
 # `hardhat-exposed`
 contracts-exposed/
 
+# The project installation flag.
+/scripts/project-config/setup/.installed
+
 # `solc` output files.
 *.abi
 *.bin

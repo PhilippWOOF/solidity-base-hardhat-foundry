@@ -1,10 +1,10 @@
-const { accessSync } = require("fs");
+const { accessSync, writeFileSync } = require("fs");
+const { join } = require("path");
 const { enforcePNPMPackageManager } = require("./enforce-pnpm.js");
 const { initializeGitRepository } = require("./init-git.js");
 const { installGitSubmodules } = require("./install-git-submodules.js");
-const { removeTemplateLicense } = require("./remove-template-license.js");
 
-function fileOrDirExists(filePath) {
+function fileExists(filePath) {
     try {
         accessSync(filePath);
         return true;
@@ -13,9 +13,18 @@ function fileOrDirExists(filePath) {
     }
 }
 
+function createFileInstalled() {
+    const fileName = ".installed";
+    try {
+        writeFileSync(join(__dirname, fileName), "");
+    } catch (err) {
+        console.error(`Error when creating the file \`${fileName}\`: ${err}\n`);
+    }
+}
+
 function prepareForInstallation() {
     if (process.env.GH_ACTION) return;
-    if (fileOrDirExists(`${process.cwd()}/node_modules`)) return;
+    if (fileExists(join(__dirname, ".installed"))) return;
 
     console.log();
     enforcePNPMPackageManager();
@@ -23,9 +32,7 @@ function prepareForInstallation() {
     installGitSubmodules().catch((error) => {
         console.error("Error when installing Git submodules:", error, "\n");
     });
-    removeTemplateLicense().catch((error) => {
-        console.error("Error when removing the template's license:", error, "\n");
-    });
+    createFileInstalled();
 }
 
 prepareForInstallation();

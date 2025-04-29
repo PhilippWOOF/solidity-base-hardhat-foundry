@@ -1,6 +1,6 @@
 const { access } = require("fs").promises;
 
-async function fileOrDirExists(filePath) {
+async function fileExists(filePath) {
     try {
         await access(filePath);
         return true;
@@ -9,4 +9,4 @@ async function fileOrDirExists(filePath) {
     }
 }
 
-module.exports = { fileOrDirExists };
+module.exports = { fileExists };
