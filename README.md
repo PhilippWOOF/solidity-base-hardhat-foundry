@@ -1,4 +1,4 @@
-# Solidity project base
+# Solidity base using Hardhat and Foundry
 
 ## Installation
 
