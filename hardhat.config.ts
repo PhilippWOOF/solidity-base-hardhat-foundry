@@ -1,19 +1,18 @@
 /* eslint @typescript-eslint/no-non-null-assertion: ["off"] */
 
-import dotenv from "dotenv";
-dotenv.config();
-
 import { HardhatUserConfig } from "hardhat/config";
+import type { MultiSolcUserConfig } from "hardhat/src/types/config";
 import "tsconfig-paths/register"; // Adds support for TypeScript `paths` mappings.
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
-import "@nomiclabs/hardhat-solhint";
-import "solidity-coverage";
-import "solidity-docgen";
+import "hardhat-tracer"; // To trace events, calls and storage operations during testing.
+import "solidity-docgen"; // The tool by OpenZeppelin to generate documentation for contracts in Markdown.
 import "hardhat-contract-sizer";
 import "hardhat-abi-exporter";
-import "hardhat-gas-reporter";
-import "hardhat-tracer";
+import "hardhat-exposed";
+
+import dotenv from "dotenv";
+dotenv.config();
 
 import "./scripts/tasks/generate-account";
 
@@ -23,25 +22,31 @@ const envs = process.env;
 const ethereumMainnetKeys = envs.ETHEREUM_MAINNET_KEYS?.split(",") ?? [];
 const ethereumTestnetKeys = envs.ETHEREUM_TESTNET_KEYS?.split(",") ?? [];
 
-/*
- * The solc compiler optimizer is disabled by default to keep the Hardhat stack traces' line numbers the same.
+const isOptionTrue = (option: string | undefined) => ["true", "1"].includes(option ?? "");
+
+/* The solc compiler optimizer is disabled by default to keep the Hardhat stack traces' line numbers the same.
  * To enable, set `RUN_OPTIMIZER` to `true` in the `.env` file.
  */
-const optimizerRuns = ["true", "1"].includes(envs.RUN_OPTIMIZER ?? "") || ["true", "1"].includes(envs.REPORT_GAS ?? "");
+const optimizerRuns = isOptionTrue(envs.RUN_OPTIMIZER) || isOptionTrue(envs.REPORT_GAS);
 const optimizerRunNum = envs.OPTIMIZER_RUN_NUM ? +envs.OPTIMIZER_RUN_NUM : 200;
+const viaIR = envs.VIA_IR ? isOptionTrue(envs.VIA_IR) : true;
 
-const enableForking = ["true", "1"].includes(envs.FORKING ?? "");
-const networkHardfork = enableForking ? envs.HARDFORK : envs.HARDFORK ? envs.HARDFORK : "cancun";
+const enableForking = isOptionTrue(envs.FORKING);
 
-const serial = ["true", "1"].includes(envs.SERIAL ?? "");
+const mochaSerial = isOptionTrue(envs.SERIAL);
+const mochaBail = isOptionTrue(envs.BAIL);
+
+const enableSourcify = envs.SOURCIFY ? true : envs.ETHERSCAN_API_KEY ? false : true;
+
+const abiExporterExceptions = ["interfaces/", "mocks/", "vendor/", "contracts-exposed/"];
 
 const config: HardhatUserConfig = {
     solidity: {
         compilers: [
             {
-                version: "0.8.28",
+                version: "0.8.29",
                 settings: {
-                    viaIR: optimizerRuns,
+                    viaIR: viaIR,
                     optimizer: {
                         enabled: optimizerRuns,
                         runs: optimizerRunNum,
@@ -50,9 +55,7 @@ const config: HardhatUserConfig = {
                                 optimizerSteps: optimizerRuns ? "u" : undefined
                             }
                         }
-                    },
-                    // Set to "paris" for chains that do not support the `PUSH0` opcode, such as Polygon, etc.
-                    evmVersion: "cancun"
+                    }
                 }
             }
             // { version: "0.7.6" }
@@ -70,8 +73,7 @@ const config: HardhatUserConfig = {
             forking: {
                 url: envs.FORKING_URL ?? "",
                 enabled: enableForking
-            },
-            hardfork: networkHardfork
+            }
             // Uncomment if "Error: cannot estimate gas; transaction may fail or may require manual gas limit...".
             // gas: 3E7,
             // gasPrice: 8E9
@@ -91,50 +93,80 @@ const config: HardhatUserConfig = {
             chainId: 17000,
             url: envs.HOLESKY_URL ?? "",
             accounts: [...ethereumTestnetKeys]
+        },
+        hoodi: {
+            chainId: 560048,
+            url: envs.HOODI_URL ?? "",
+            accounts: [...ethereumTestnetKeys]
         }
     },
     etherscan: {
-        /*
-         * This is not necessarily the same name that is used to define the network.
-         * To see the full list of supported networks, run `$ npx hardhat verify --list-networks`. The identifiers
-         * shown there are the ones that should be used as keys in the `apiKey` object.
-         *
-         * See the link for details:
-         * `https://hardhat.org/hardhat-runner/plugins/nomiclabs-hardhat-etherscan#multiple-api-keys-and-alternative-block-explorers`.
-         */
+        // To see supported networks and their identifiers for `apiKey`, run `pnpm hardhat verify --list-networks`.
         apiKey: {
             mainnet: envs.ETHERSCAN_API_KEY ?? "",
             sepolia: envs.ETHERSCAN_API_KEY ?? "",
             holesky: envs.ETHERSCAN_API_KEY ?? ""
+            // hoodi: envs.ETHERSCAN_API_KEY ?? ""
         }
+    },
+    sourcify: {
+        enabled: enableSourcify
     },
     gasReporter: {
         enabled: envs.REPORT_GAS !== undefined,
         excludeContracts: ["vendor/"],
         // currency: "USD", // "CHF", "EUR", etc.
+        darkMode: true,
         showMethodSig: true,
-        L1Etherscan: envs.ETHERSCAN_API_KEY ?? ""
+        L1Etherscan: envs.ETHERSCAN_API_KEY
+        // trackGasDeltas: true // Track and report changes in gas usage between test runs.
+    },
+    mocha: {
+        timeout: 100000,
+        parallel: !mochaSerial,
+        bail: mochaBail
     },
     docgen: {
         pages: "files",
-        exclude: ["vendor/"]
+        exclude: ["mocks/", "vendor/", "contracts-exposed/"]
     },
     contractSizer: {
-        except: ["mocks/", "vendor/"]
+        except: ["mocks/", "vendor/", "contracts-exposed/"]
     },
-    abiExporter: {
-        except: ["interfaces/", "mocks/", "vendor/"],
-        spacing: 4
-    },
-    mocha: {
-        timeout: 40000,
-        parallel: !serial
-        // bail: true // Aborts after the first failure.
+    abiExporter: [
+        {
+            path: "./abi/json",
+            format: "json",
+            except: abiExporterExceptions,
+            spacing: 4
+        },
+        {
+            path: "./abi/minimal",
+            format: "minimal",
+            except: abiExporterExceptions,
+            spacing: 4
+        },
+        {
+            path: "./abi/full",
+            format: "fullName",
+            except: abiExporterExceptions,
+            spacing: 4
+        }
+    ],
+    exposed: {
+        imports: true,
+        initializers: true,
+        exclude: ["vendor/**/*"]
     }
 };
 
+if (envs.EVM_VERSION !== "default")
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (config.solidity! as MultiSolcUserConfig).compilers[0].settings!.evmVersion = envs.EVM_VERSION ?? "prague";
+
 // By default fork from the latest block.
 if (envs.FORKING_BLOCK_NUMBER) config.networks!.hardhat!.forking!.blockNumber = +envs.FORKING_BLOCK_NUMBER;
+if (envs.HARDFORK !== "default") config.networks!.hardhat!.hardfork = envs.HARDFORK ?? "prague";
 
 // Extra settings for `hardhat-gas-reporter`.
 if (envs.COINMARKETCAP_API_KEY) config.gasReporter!.coinmarketcap = envs.COINMARKETCAP_API_KEY;
