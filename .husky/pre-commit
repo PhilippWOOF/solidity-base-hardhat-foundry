@@ -1,6 +1,1 @@
-if [ ! -e ".audit_mode" ]; then
-    npx lint-staged
-else
-    npx prettier --write "**/*.{ts,js,mjs,cjs,json,jsonc,md}"
-    npx eslint . --fix
-fi
+pnpm lint-staged

@@ -5,6 +5,7 @@ dotenv.config();
 
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-foundry";
 import "@nomiclabs/hardhat-solhint";
 import "solidity-coverage";
 import "solidity-docgen";
