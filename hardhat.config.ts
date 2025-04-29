@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { HardhatUserConfig } from "hardhat/config";
+import "tsconfig-paths/register"; // Adds support for TypeScript `paths` mappings.
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
 import "@nomiclabs/hardhat-solhint";
