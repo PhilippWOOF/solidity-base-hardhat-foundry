@@ -1,13 +1,15 @@
 module.exports = {
     skipFiles: ["interfaces/", "mocks/", "vendor/"],
     mocha: {
-        fgrep: "[skip-on-coverage]",
-        invert: true
+        fgrep: "[skip-on-coverage]", // Find everything with this tag.
+        invert: true, // Run the grep's inverse set.
+        enableTimeouts: false,
+        parallel: false
     },
-    /*
-     * (Deprecated). Work around "stack too deep" in projects using ABIEncoderV2.
-     * https://github.com/sc-forks/solidity-coverage/blob/9b64cbacd1ff352f78f4589bf0a5130d030402e0/docs/faq.md#running-out-of-time
-     */
+    // measureStatementCoverage: false,
+    // measureFunctionCoverage: false,
+    irMinimum: !!process.env.VIA_IR, // Comment this line if "stack too deep" with `VIA_IR=true`.
+    // Work around "stack too deep".
     configureYulOptimizer: true,
     solcOptimizerDetails: {
         yul: true,
@@ -15,4 +17,15 @@ module.exports = {
             optimizerSteps: ""
         }
     }
+    // Alternative configuration for the Yul optimizer. Try to use it if "stack too deep" errors with the previous one.
+    // solcOptimizerDetails: {
+    //     peephole: false,
+    //     inliner: false,
+    //     jumpdestRemover: false,
+    //     orderLiterals: true,
+    //     deduplicate: false,
+    //     cse: false,
+    //     constantOptimizer: false,
+    //     yul: false
+    // }
 };
