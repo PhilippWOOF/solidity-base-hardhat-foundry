@@ -9,7 +9,9 @@
         "gen:docs": "rm -rf docs && pnpm hardhat docgen",
         "gen:abi": "rm -rf abi && pnpm hardhat export-abi",
         "coverage": "bash scripts/commands/coverage.sh",
-        "coverage:fs": "pnpm clean:cov && forge coverage --ir-minimum --force",
+        "coverageh": "pnpm coverage h",
+        "coveragef": "pnpm coverage f",
+        "coveragef:sum": "pnpm coverage f sum",
         "slither": "pnpm clean:build && slither .",
         "test": "pnpm testh && pnpm testf",
         "lint": "pnpm lint:ts && pnpm lint:sol",
@@ -21,8 +23,6 @@
         "size": "pnpm compile:force && pnpm hardhat size-contracts --no-compile",
         "testf": "forge test",
         "testh": "pnpm hardhat test",
-        "testh:v": "pnpm testh --trace-error",
-        "testh:vv": "pnpm testh --fulltrace-error",
         "testh:vvv": "pnpm testh --trace --gascost",
         "testh:vvvv": "pnpm testh --fulltrace --gascost",
         "testh:check": "pnpm testh --typecheck",
@@ -31,15 +31,14 @@
         "testh:gas:json": "REPORT_GAS_FILE_TYPE=json pnpm testh:gas",
         "testh:gas:md": "REPORT_GAS_FILE_TYPE=md pnpm testh:gas",
         "slither:md": "pnpm clean:build && bash scripts/commands/slither.sh",
-        "compile:force": "pnpm compileh --force",
-        "coverage:fix": "pnpm clean:cov && pnpm compile && pnpm coverage",
+        "compile:force": "pnpm compileh --force && pnpm compilef --force",
         "clean:build": "bash scripts/commands/clean.sh build",
         "clean:oz": "bash scripts/commands/clean.sh oz",
         "clean:ignition": "bash scripts/commands/clean.sh ignition",
         "clean:cov": "bash scripts/commands/clean.sh coverage",
-        "compileh:4g": "pnpm compileh -- --max-memory 4096",
-        "coverageh:4g": "NODE_OPTIONS=\"--max-old-space-size=4096\" pnpm coverage --max-memory 4096",
-        "coverageh:8g": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm coverage --max-memory 8192",
+        "compileh:4": "pnpm compileh --max-memory 4096",
+        "coverageh:4": "pnpm coverage h 4096",
+        "coverageh:8": "pnpm coverage h 8192",
         "lint:ts": "pnpm prettier --check \"**/*.{ts,js}\" && pnpm eslint .",
         "lint:ts:fix": "pnpm prettier --write \"**/*.{ts,js}\" && pnpm eslint . --fix",
         "lint:sol": "pnpm solhint \"contracts/**/*.sol\" && pnpm prettier --no-error-on-unmatched-pattern --check \"{contracts,test}/**/*.sol\"",
@@ -105,5 +104,8 @@
         "yarn": "please-use-pnpm",
         "pnpm": ">=10.9.0",
         "node": ">=22.10.0 <23.0.0 || >=23.11.0"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "^5.3.0"
     }
 }
