@@ -33,6 +33,7 @@
         "compat",
         "compilef",
         "compileh",
+        "coveragef",
         "crytic",
         "depl",
         "docgen",
