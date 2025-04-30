@@ -5,7 +5,10 @@ import type { MultiSolcUserConfig } from "hardhat/src/types/config";
 import "tsconfig-paths/register"; // Adds support for TypeScript `paths` mappings.
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
-import "hardhat-tracer"; // To trace events, calls and storage operations during testing.
+/* `hardhat-tracer` traces events, calls and storage operations as tests progress.
+ * However, it slows down test execution even when not in use. It can be commented out if it is not needed.
+ */
+import "hardhat-tracer";
 import "solidity-docgen"; // The tool by OpenZeppelin to generate documentation for contracts in Markdown.
 import "hardhat-contract-sizer";
 import "hardhat-abi-exporter";
