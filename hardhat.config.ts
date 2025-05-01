@@ -2,7 +2,10 @@
 
 import { HardhatUserConfig } from "hardhat/config";
 import type { MultiSolcUserConfig } from "hardhat/src/types/config";
-import "tsconfig-paths/register"; // Adds support for TypeScript `paths` mappings.
+/* Uncomment if support of TypeScript `paths` mappings is needed.
+ * Make sure to run `pnpm add -D "tsconfig-paths@4.2.0"` in this case.
+ */
+// import "tsconfig-paths/register";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
 /* `hardhat-tracer` traces events, calls and storage operations as tests progress.
