@@ -19,7 +19,7 @@ coverage_foundry() {
     if [ -z "$1" ]; then
         mkdir -p coverage/forge
         forge coverage --force --report lcov --lcov-version 2.2 -r coverage/forge/lcov.info
-        genhtml coverage/forge/lcov.info --rc derive_function_end_line=0 --branch-coverage -o coverage/forge
+        genhtml coverage/forge/lcov.info --rc derive_function_end_line=0 --branch-coverage --ignore-errors format --ignore-errors category -o coverage/forge
     elif [ "$1" == "sum" ]; then
         forge coverage --ir-minimum --force
     else
