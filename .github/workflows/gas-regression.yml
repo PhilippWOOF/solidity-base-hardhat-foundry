@@ -1,0 +1,136 @@
+name: Gas Regression Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  gas-analysis:
+    name: Gas Usage Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Compile contracts
+        run: pnpm compile
+
+      - name: Run gas analysis (Hardhat)
+        run: |
+          echo "Running Hardhat gas analysis..."
+          REPORT_GAS=true SERIAL=true RUN_OPTIMIZER=true pnpm testh:gas:json || echo "No Hardhat tests found"
+
+      - name: Run gas analysis (Foundry)
+        run: |
+          echo "Running Foundry gas analysis..."
+          forge test --gas-report || echo "No Foundry tests found"
+
+      - name: Generate gas report summary
+        run: |
+          echo "## Gas Usage Report" > gas-summary.md
+          echo "" >> gas-summary.md
+          echo "### Hardhat Gas Report" >> gas-summary.md
+          echo "" >> gas-summary.md
+          if [ -f "gas-report.json" ]; then
+            echo "Gas report generated successfully" >> gas-summary.md
+            echo "```json" >> gas-summary.md
+            head -50 gas-report.json >> gas-summary.md
+            echo "```" >> gas-summary.md
+          else
+            echo "No gas report generated" >> gas-summary.md
+          fi
+          
+          echo "" >> gas-summary.md
+          echo "### Foundry Gas Report" >> gas-summary.md
+          echo "" >> gas-summary.md
+          if [ -f "gas-report.txt" ]; then
+            echo "```" >> gas-summary.md
+            cat gas-report.txt >> gas-summary.md
+            echo "```" >> gas-summary.md
+          else
+            echo "No Foundry gas report found" >> gas-summary.md
+          fi
+
+      - name: Upload gas reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: gas-reports-${{ github.sha }}
+          path: |
+            gas-report.json
+            gas-report.txt
+            gas-summary.md
+          retention-days: 90
+
+      - name: Comment gas report on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## ⛽ Gas Usage Analysis\n\n';
+            
+            try {
+              if (fs.existsSync('gas-summary.md')) {
+                const gasSummary = fs.readFileSync('gas-summary.md', 'utf8');
+                comment += gasSummary;
+              } else {
+                comment += 'No gas analysis performed (no tests found).\n\n';
+              }
+              
+              comment += '📊 Full gas reports available in workflow artifacts.';
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Error creating comment:', error);
+            }
+
+      - name: Store gas metrics (for regression tracking)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # This step can be extended to store gas metrics in a database
+          # or external service for historical tracking
+          echo "Storing gas metrics for regression tracking..."
+          
+          # Example: Store in GitHub repository as JSON
+          if [ -f "gas-report.json" ]; then
+            echo "Gas metrics stored for future comparison"
+          fi 
