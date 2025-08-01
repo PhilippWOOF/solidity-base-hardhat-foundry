@@ -5,6 +5,7 @@ const { suggestAuditMode } = require("./suggest-audit-mode.js");
 const { suggestWorkflows } = require("./suggest-github-workflows.js");
 const { fileExists } = require("./file-exists.js");
 const { removeTemplateLicense } = require("./remove-template-license.js");
+const { suggestBranchProtection } = require("./suggest-branch-protection.js");
 
 async function createFileInitialized() {
     const fileName = ".initialized";
@@ -24,6 +25,7 @@ async function finalizeAfterInstallation() {
     await suggestOptionalDependencies();
     await suggestAuditMode();
     await suggestWorkflows();
+    await suggestBranchProtection();
     await createFileInitialized();
     console.log("\nInitialization completed successfully.");
 }
