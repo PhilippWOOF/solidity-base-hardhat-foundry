@@ -51,6 +51,10 @@
         "/contracts/**/*.sol",
         "!/mocks/**/*"
     ],
+    "dependencies": {
+        "@openzeppelin/contracts": "5.4.0",
+        "@openzeppelin/contracts-upgradeable": "5.4.0"
+    },
     "devDependencies": {
         "@commitlint/cli": "19.8.0",
         "@commitlint/config-conventional": "19.8.0",
@@ -66,6 +70,7 @@
         "@nomicfoundation/hardhat-network-helpers": "1.0.12",
         "@nomicfoundation/hardhat-toolbox": "5.0.0",
         "@nomicfoundation/hardhat-verify": "2.0.13",
+        "@openzeppelin/hardhat-upgrades": "3.9.1",
         "@typechain/ethers-v6": "0.5.1",
         "@typechain/hardhat": "9.1.0",
         "@types/chai": "4.3.20",
@@ -87,6 +92,7 @@
         "inquirer": "12.6.0",
         "lint-staged": "15.5.1",
         "mocha": "11.1.0",
+        "node-fetch": "^2.7.0",
         "prettier": "3.5.3",
         "prettier-plugin-solidity": "2.0.0",
         "solhint": "5.0.5",
@@ -95,8 +101,7 @@
         "ts-node": "10.9.2",
         "typechain": "8.3.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.31.0",
-        "node-fetch": "^2.7.0"
+        "typescript-eslint": "8.31.0"
     },
     "packageManager": "pnpm@10.10.0",
     "engines": {
