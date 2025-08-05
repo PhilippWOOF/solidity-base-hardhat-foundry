@@ -40,7 +40,8 @@ const Configuration: UserConfig = {
                 // A merger of branches in a version control, including rebasing.
                 "merge"
             ]
-        ]
+        ],
+        "scope-empty": [RuleConfigSeverity.Error, "never"] // Requires scope
     }
 };
 
