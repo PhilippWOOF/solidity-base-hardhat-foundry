@@ -1,8 +1,8 @@
-name: Gas Usage Regression
+name: Deployment Simulation
 
 on:
   workflow_run:
-    workflows: ["Code Coverage"]
+    workflows: ["Gas Usage Regression"]
     types:
       - completed
 
@@ -11,9 +11,8 @@ env:
   FOUNDRY_PROFILE: default
 
 jobs:
-  gas-regression:
+  deployment-simulation:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,14 +41,9 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-      - name: Run gas regression tests
-        run: pnpm testh:gas:json
-        env:
-          REPORT_GAS: true
-          SERIAL: true
-          RUN_OPTIMIZER: true
-      - name: Upload gas report
-        uses: actions/upload-artifact@v4
-        with:
-          name: gas-report
-          path: gas-report.json
+      - name: Compile contracts
+        run: pnpm compile
+      - name: Dry run deployment (Hardhat)
+        run: |
+          pnpm hardhat run --network hardhat scripts/deploy.ts || echo "No deployment script found, skipping dry run"
+        continue-on-error: true

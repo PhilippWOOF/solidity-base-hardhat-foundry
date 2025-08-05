@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 env:
   FORGE_PROFILE: default
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -83,7 +83,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -137,7 +137,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -191,7 +191,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -253,7 +253,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -305,7 +305,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -354,7 +354,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -389,7 +389,7 @@ jobs:
         run: |
           # Install Mythril if not available
           pip3 install mythril || echo "Mythril installation failed, skipping"
-          
+
           # Run Mythril analysis on compiled contracts
           find artifacts/contracts -name "*.json" -exec myth analyze {} \; || echo "Mythril analysis failed or no contracts found"
         continue-on-error: true
@@ -399,7 +399,7 @@ jobs:
           # Install Echidna
           curl -L https://github.com/crytic/echidna/releases/download/v2.0.4/echidna-test-2.0.4-Ubuntu-18.04.tar.gz | tar -xz
           sudo mv echidna-test /usr/local/bin/
-          
+
           # Run basic Echidna tests if contract files exist
           find contracts -name "*.sol" -exec echo "Running Echidna on {}" \; -exec echidna-test {} --contract TestContract --config echidna.config.yml \; || echo "Echidna analysis failed or no contracts found"
         continue-on-error: true
@@ -415,7 +415,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -456,7 +456,14 @@ jobs:
   status-check:
     name: Status Check
     runs-on: ubuntu-latest
-    needs: [compile-and-lint, static-analysis, unit-tests, coverage, deployment-simulation]
+    needs:
+      [
+        compile-and-lint,
+        static-analysis,
+        unit-tests,
+        coverage,
+        deployment-simulation,
+      ]
     if: always()
     steps:
       - name: Check job status
@@ -482,4 +489,4 @@ jobs:
             echo "❌ Deployment Simulation failed"
             exit 1
           fi
-          echo "✅ All required checks passed!" 
+          echo "✅ All required checks passed!"

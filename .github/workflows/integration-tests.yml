@@ -1,8 +1,8 @@
-name: Gas Usage Regression
+name: Integration Tests
 
 on:
   workflow_run:
-    workflows: ["Code Coverage"]
+    workflows: ["Security Analysis"]
     types:
       - completed
 
@@ -11,9 +11,8 @@ env:
   FOUNDRY_PROFILE: default
 
 jobs:
-  gas-regression:
+  integration-tests:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,14 +41,10 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-      - name: Run gas regression tests
-        run: pnpm testh:gas:json
-        env:
-          REPORT_GAS: true
-          SERIAL: true
-          RUN_OPTIMIZER: true
-      - name: Upload gas report
-        uses: actions/upload-artifact@v4
-        with:
-          name: gas-report
-          path: gas-report.json
+      - name: Compile contracts
+        run: pnpm compile
+      - name: Run integration tests
+        run: |
+          echo "Integration tests not yet implemented"
+          echo "TODO: Add integration test scripts"
+        continue-on-error: true

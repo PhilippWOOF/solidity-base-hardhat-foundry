@@ -1,8 +1,8 @@
-name: Gas Usage Regression
+name: Static Analysis & Security
 
 on:
   workflow_run:
-    workflows: ["Code Coverage"]
+    workflows: ["Compile & Lint"]
     types:
       - completed
 
@@ -11,9 +11,8 @@ env:
   FOUNDRY_PROFILE: default
 
 jobs:
-  gas-regression:
+  static-analysis:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,14 +41,14 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-      - name: Run gas regression tests
-        run: pnpm testh:gas:json
-        env:
-          REPORT_GAS: true
-          SERIAL: true
-          RUN_OPTIMIZER: true
-      - name: Upload gas report
-        uses: actions/upload-artifact@v4
-        with:
-          name: gas-report
-          path: gas-report.json
+      - name: Install Slither
+        run: |
+          pip3 install slither-analyzer
+      - name: Compile contracts
+        run: pnpm compile
+      - name: Run Slither static analysis
+        run: pnpm slither
+        continue-on-error: true
+      - name: Run Slither with markdown output
+        run: pnpm slither:md
+        continue-on-error: true

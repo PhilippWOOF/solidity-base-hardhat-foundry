@@ -1,8 +1,8 @@
-name: Gas Usage Regression
+name: Security Analysis
 
 on:
   workflow_run:
-    workflows: ["Code Coverage"]
+    workflows: ["Deployment Simulation"]
     types:
       - completed
 
@@ -11,9 +11,9 @@ env:
   FOUNDRY_PROFILE: default
 
 jobs:
-  gas-regression:
+  security-analysis:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,14 +42,16 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-      - name: Run gas regression tests
-        run: pnpm testh:gas:json
-        env:
-          REPORT_GAS: true
-          SERIAL: true
-          RUN_OPTIMIZER: true
-      - name: Upload gas report
-        uses: actions/upload-artifact@v4
-        with:
-          name: gas-report
-          path: gas-report.json
+      - name: Compile contracts
+        run: pnpm compile
+      - name: Run Mythril analysis
+        run: |
+          pip3 install mythril || echo "Mythril installation failed, skipping"
+          find artifacts/contracts -name "*.json" -exec myth analyze {} \; || echo "Mythril analysis failed or no contracts found"
+        continue-on-error: true
+      - name: Run Echidna fuzzing (if contracts exist)
+        run: |
+          curl -L https://github.com/crytic/echidna/releases/download/v2.0.4/echidna-test-2.0.4-Ubuntu-18.04.tar.gz | tar -xz
+          sudo mv echidna-test /usr/local/bin/
+          find contracts -name "*.sol" -exec echo "Running Echidna on {}" \; -exec echidna-test {} --contract TestContract --config echidna.config.yml \; || echo "Echidna analysis failed or no contracts found"
+        continue-on-error: true

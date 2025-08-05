@@ -1,8 +1,8 @@
-name: Gas Usage Regression
+name: Code Coverage
 
 on:
   workflow_run:
-    workflows: ["Code Coverage"]
+    workflows: ["Unit Tests"]
     types:
       - completed
 
@@ -11,9 +11,8 @@ env:
   FOUNDRY_PROFILE: default
 
 jobs:
-  gas-regression:
+  coverage:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,14 +41,21 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-      - name: Run gas regression tests
-        run: pnpm testh:gas:json
-        env:
-          REPORT_GAS: true
-          SERIAL: true
-          RUN_OPTIMIZER: true
-      - name: Upload gas report
-        uses: actions/upload-artifact@v4
+      - name: Run Hardhat coverage
+        run: pnpm coverageh
+      - name: Run Foundry coverage
+        run: pnpm coveragef
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
         with:
-          name: gas-report
-          path: gas-report.json
+          file: ./coverage.json
+          flags: hardhat
+          name: hardhat-coverage
+          fail_ci_if_error: false
+      - name: Upload Foundry coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./lcov.info
+          flags: foundry
+          name: foundry-coverage
+          fail_ci_if_error: false
