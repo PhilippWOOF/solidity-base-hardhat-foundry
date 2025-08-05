@@ -1,0 +1,55 @@
+name: Unit Tests
+
+on:
+  workflow_run:
+    workflows: ["Static Analysis & Security"]
+    types:
+      - completed
+
+env:
+  FORGE_PROFILE: default
+  FOUNDRY_PROFILE: default
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Run Hardhat tests
+        run: pnpm testh
+        env:
+          REPORT_GAS: true
+      - name: Run Foundry tests
+        run: pnpm testf
+      - name: Run gas report tests
+        run: pnpm testh:gas
+        env:
+          REPORT_GAS: true
+          SERIAL: true
+          RUN_OPTIMIZER: true

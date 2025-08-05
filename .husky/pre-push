@@ -1,17 +1,36 @@
-pnpm gen:abi
-pnpm prettier -u --no-error-on-unmatched-pattern --write "abi/**/*"
-if [ -d "abi/" ]; then
-    git add abi/
-fi
-if ! git diff --cached --quiet; then
-    git commit -m "chore(abi): update";
+#!/usr/bin/env bash
+. "$(dirname "$0")/_/husky.sh"
+
+commit_msg_type_regex='feat|fix|refactor|style|test|docs|build|chore|ci|perf|revert|merge'
+commit_msg_scope_regex='.{1,20}'
+commit_msg_description_regex='.{1,100}'
+# Remove the ? to make scope required
+commit_msg_regex="^(${commit_msg_type_regex})(\(${commit_msg_scope_regex}\)): (${commit_msg_description_regex})\$"
+merge_msg_regex="^Merge branch '.+'\$"
+
+error=""
+
+# Find the remote tracking branch to compare against
+remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+
+if [ -z "$remote_branch" ]; then
+  echo "No upstream branch found. Skipping commit message validation."
+  exit 0
 fi
 
-pnpm gen:docs
-pnpm prettier -u --no-error-on-unmatched-pattern --write "docs/**/*"
-if [ -d "docs/" ]; then
-    git add docs/
-fi
-if ! git diff --cached --quiet; then
-    git commit -m "chore(contract-docs): update";
+# Get all commits that are about to be pushed
+rev_span=$(git rev-list ${remote_branch}..HEAD)
+
+for commit in $rev_span; do
+  commit_msg_header=$(git show -s --format=%s $commit)
+  if ! [[ "$commit_msg_header" =~ (${commit_msg_regex})|(${merge_msg_regex}) ]]; then
+    echo "$commit" >&2
+    echo "ERROR: Invalid commit message format" >&2
+    echo "$commit_msg_header" >&2
+    error="true"
+  fi
+done
+
+if [ -n "$error" ]; then
+  exit 1
 fi

@@ -1,0 +1,492 @@
+# name: CI Pipeline
+
+# on:
+#   push:
+#     branches: [main, develop]
+#   pull_request:
+#     branches: [main, develop]
+
+# env:
+#   FORGE_PROFILE: default
+#   FOUNDRY_PROFILE: default
+
+# jobs:
+#   # Job 1: Solidity Compiler Check & Linting
+#   compile-and-lint:
+#     name: Compile & Lint
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Install Solhint
+#         run: pnpm add -g solhint
+
+#       - name: Install Slither
+#         run: |
+#           pip3 install slither-analyzer
+
+#       - name: Compile contracts (Hardhat)
+#         run: pnpm compileh
+
+#       - name: Compile contracts (Foundry)
+#         run: pnpm compilef
+
+#       - name: Lint TypeScript/JavaScript
+#         run: pnpm lint:ts
+
+#       - name: Lint Solidity
+#         run: pnpm lint:sol
+
+#       - name: Check contract sizes
+#         run: pnpm size
+
+#   # Job 2: Static Analysis & Security
+#   static-analysis:
+#     name: Static Analysis & Security
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Install Slither
+#         run: |
+#           pip3 install slither-analyzer
+
+#       - name: Compile contracts
+#         run: pnpm compile
+
+#       - name: Run Slither static analysis
+#         run: pnpm slither
+#         continue-on-error: true
+
+#       - name: Run Slither with markdown output
+#         run: pnpm slither:md
+#         continue-on-error: true
+
+#   # Job 3: Unit Tests
+#   unit-tests:
+#     name: Unit Tests
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Run Hardhat tests
+#         run: pnpm testh
+#         env:
+#           REPORT_GAS: true
+
+#       - name: Run Foundry tests
+#         run: pnpm testf
+
+#       - name: Run gas report tests
+#         run: pnpm testh:gas
+#         env:
+#           REPORT_GAS: true
+#           SERIAL: true
+#           RUN_OPTIMIZER: true
+
+#   # Job 4: Code Coverage
+#   coverage:
+#     name: Code Coverage
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Run Hardhat coverage
+#         run: pnpm coverageh
+
+#       - name: Run Foundry coverage
+#         run: pnpm coveragef
+
+#       - name: Upload coverage reports
+#         uses: codecov/codecov-action@v4
+#         with:
+#           file: ./coverage.json
+#           flags: hardhat
+#           name: hardhat-coverage
+#           fail_ci_if_error: false
+
+#       - name: Upload Foundry coverage
+#         uses: codecov/codecov-action@v4
+#         with:
+#           file: ./lcov.info
+#           flags: foundry
+#           name: foundry-coverage
+#           fail_ci_if_error: false
+
+#   # Job 5: Gas Usage Regression (only on main branch)
+#   gas-regression:
+#     name: Gas Usage Regression
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Run gas regression tests
+#         run: pnpm testh:gas:json
+#         env:
+#           REPORT_GAS: true
+#           SERIAL: true
+#           RUN_OPTIMIZER: true
+
+#       - name: Upload gas report
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: gas-report
+#           path: gas-report.json
+
+#   # Job 6: Deployment Simulation
+#   deployment-simulation:
+#     name: Deployment Simulation
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Compile contracts
+#         run: pnpm compile
+
+#       - name: Dry run deployment (Hardhat)
+#         run: |
+#           # This will simulate deployment without actually deploying
+#           pnpm hardhat run --network hardhat scripts/deploy.ts || echo "No deployment script found, skipping dry run"
+#         continue-on-error: true
+
+#   # Job 7: Security Analysis (MythX/Mythril) - Optional for PRs, Mandatory for main
+#   security-analysis:
+#     name: Security Analysis
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Compile contracts
+#         run: pnpm compile
+
+#       - name: Run Mythril analysis
+#         run: |
+#           # Install Mythril if not available
+#           pip3 install mythril || echo "Mythril installation failed, skipping"
+
+#           # Run Mythril analysis on compiled contracts
+#           find artifacts/contracts -name "*.json" -exec myth analyze {} \; || echo "Mythril analysis failed or no contracts found"
+#         continue-on-error: true
+
+#       - name: Run Echidna fuzzing (if contracts exist)
+#         run: |
+#           # Install Echidna
+#           curl -L https://github.com/crytic/echidna/releases/download/v2.0.4/echidna-test-2.0.4-Ubuntu-18.04.tar.gz | tar -xz
+#           sudo mv echidna-test /usr/local/bin/
+
+#           # Run basic Echidna tests if contract files exist
+#           find contracts -name "*.sol" -exec echo "Running Echidna on {}" \; -exec echidna-test {} --contract TestContract --config echidna.config.yml \; || echo "Echidna analysis failed or no contracts found"
+#         continue-on-error: true
+
+#   # Job 8: Integration Tests (placeholder for future implementation)
+#   integration-tests:
+#     name: Integration Tests
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: 8
+
+#       - name: Get pnpm store directory
+#         shell: bash
+#         run: |
+#           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+#       - name: Setup pnpm cache
+#         uses: actions/cache@v4
+#         with:
+#           path: ${{ env.STORE_PATH }}
+#           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pnpm-store-
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Install Foundry
+#         uses: foundry-rs/foundry-toolchain@v1
+#         with:
+#           version: nightly
+
+#       - name: Compile contracts
+#         run: pnpm compile
+
+#       - name: Run integration tests
+#         run: |
+#           echo "Integration tests not yet implemented"
+#           echo "TODO: Add integration test scripts"
+#         continue-on-error: true
+
+#   # Job 9: Final Status Check
+#   status-check:
+#     name: Status Check
+#     runs-on: ubuntu-latest
+#     needs:
+#       [
+#         compile-and-lint,
+#         static-analysis,
+#         unit-tests,
+#         coverage,
+#         deployment-simulation,
+#       ]
+#     if: always()
+#     steps:
+#       - name: Check job status
+#         run: |
+#           echo "Checking CI pipeline status..."
+#           if [ "${{ needs.compile-and-lint.result }}" != "success" ]; then
+#             echo "❌ Compile & Lint failed"
+#             exit 1
+#           fi
+#           if [ "${{ needs.static-analysis.result }}" != "success" ]; then
+#             echo "❌ Static Analysis failed"
+#             exit 1
+#           fi
+#           if [ "${{ needs.unit-tests.result }}" != "success" ]; then
+#             echo "❌ Unit Tests failed"
+#             exit 1
+#           fi
+#           if [ "${{ needs.coverage.result }}" != "success" ]; then
+#             echo "❌ Coverage failed"
+#             exit 1
+#           fi
+#           if [ "${{ needs.deployment-simulation.result }}" != "success" ]; then
+#             echo "❌ Deployment Simulation failed"
+#             exit 1
+#           fi
+#           echo "✅ All required checks passed!"

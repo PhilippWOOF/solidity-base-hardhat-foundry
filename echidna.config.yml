@@ -1,0 +1,34 @@
+# Echidna Configuration for Fuzzing Tests
+# This file configures Echidna for automated security testing
+
+# Test configuration
+testMode: assertion
+testLimit: 50000
+corpusDir: corpus
+coverage: true
+
+# Contract configuration
+deployer: "0x10000"
+sender: ["0x10000", "0x20000"]
+
+# Gas configuration
+gasLimit: 3000000
+gasPrice: 1
+
+# Sequence length for stateful testing
+sequenceLength: 100
+
+# Contract addresses (will be auto-populated)
+contractAddr: "0x00a329c0648769A73afAc7F9381E08FB43dBEA72"
+
+# Function filtering
+filterFunctions: []
+
+# Contract source
+contractSrc: "contracts/"
+
+# Test timeout
+timeout: 300
+
+# Verbosity level
+verbosity: 2 

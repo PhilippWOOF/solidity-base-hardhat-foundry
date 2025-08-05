@@ -1,0 +1,61 @@
+name: Code Coverage
+
+on:
+  workflow_run:
+    workflows: ["Unit Tests"]
+    types:
+      - completed
+
+env:
+  FORGE_PROFILE: default
+  FOUNDRY_PROFILE: default
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Run Hardhat coverage
+        run: pnpm coverageh
+      - name: Run Foundry coverage
+        run: pnpm coveragef
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.json
+          flags: hardhat
+          name: hardhat-coverage
+          fail_ci_if_error: false
+      - name: Upload Foundry coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./lcov.info
+          flags: foundry
+          name: foundry-coverage
+          fail_ci_if_error: false

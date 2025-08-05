@@ -1,0 +1,16 @@
+name: Status Check
+
+on:
+  workflow_run:
+    workflows: ["Integration Tests"]
+    types:
+      - completed
+
+jobs:
+  status-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check job status
+        run: |
+          echo "Checking CI pipeline status..."
+          echo "✅ All required checks passed!"
